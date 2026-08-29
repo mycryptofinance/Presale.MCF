@@ -26,10 +26,10 @@ const BASE_CHAIN_ID = "0x2105"; // Chain ID 8453 (Base)
         let provider, signer, userAddress;
         let isConnected = false;
 
-       let lastEdited = 'pay'; // Отслеживаем, какое поле вводил пользователь последние ('pay' или 'mcf')
+        let lastEdited = 'pay'; // Отслеживаем, какое поле вводил пользователь последние ('pay' или 'mcf')
 
     // Ввод в верхнем поле -> рассчитываем MCF
-    function calculateMCF() {
+        function calculateMCF() {
     lastEdited = 'pay';
     const payAmount = parseFloat(document.getElementById('payAmountInput').value);
     const currency = document.getElementById('currencySelect').value;
@@ -42,10 +42,10 @@ const BASE_CHAIN_ID = "0x2105"; // Chain ID 8453 (Base)
 
     const mcfAmount = payAmount * RATES[currency];
     mcfInput.value = mcfAmount;
-}
-
+        }
+  
     // Ввод в нижнем поле -> рассчитываем сумму оплаты
-    function calculatePayAmount() {
+        function calculatePayAmount() {
     lastEdited = 'mcf';
     const mcfAmount = parseFloat(document.getElementById('mcfAmountInput').value);
     const currency = document.getElementById('currencySelect').value;
@@ -64,23 +64,23 @@ const BASE_CHAIN_ID = "0x2105"; // Chain ID 8453 (Base)
     } else {
         payInput.value = payAmount.toFixed(2);
     }
-}
+        }
 
     // Смена монеты (USDC / USDT / ETH) -> пересчет относительно последнего измененного поля
-    function onCurrencyChange() {
+        function onCurrencyChange() {
     if (lastEdited === 'mcf') {
         calculatePayAmount();
     } else {
         calculateMCF();
     }
-}
+        }
 
     
         function showModal(title, text) {
             document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalText').innerText = text;
+            document.getElementById('modalText').innerHTML = text; // <-- Изменено на innerHTML
             document.getElementById('customModal').classList.add('show');
-        }
+        }        
 
         function closeModal() {
             document.getElementById('customModal').classList.remove('show');
@@ -187,7 +187,7 @@ const BASE_CHAIN_ID = "0x2105"; // Chain ID 8453 (Base)
             if (!userAddress || !provider) return;
             try {
                 const ethWei = await provider.getBalance(userAddress);
-                document.getElementById('ethBalance').innerText = parseFloat(ethers.formatEther(ethWei)).toFixed(4);
+                document.getElementById('ethBalance').innerText = parseFloat(ethers.formatEther(ethWei)).toFixed(7);
 
                 try {
                     const usdcContract = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, provider);
@@ -242,10 +242,13 @@ const BASE_CHAIN_ID = "0x2105"; // Chain ID 8453 (Base)
 
                     const tx = await presaleContract.buyWithETH({ value: parsedWei });
                     buyBtn.innerText = "Обработка...";
-                    showModal("Транзакция отправлена", `Ожидаем подтверждения...\nHash: ${tx.hash}`);
+                    const ethPendingLink = `<a href="https://basescan.org/tx/${tx.hash}" target="_blank" rel="noopener noreferrer" style="color:#3b82f6; text-decoration:underline; word-break:break-all;">${tx.hash.substring(0, 6)}...${tx.hash.substring(tx.hash.length - 4)} ↗</a>`;
+                    showModal("Транзакция отправлена", `Ожидаем подтверждения...<br><br><strong>Хэш:</strong> ${ethPendingLink}`);
 
                     await tx.wait();
-                    showModal("Успешно!", `Вы приобрели MCF за ETH!\nХэш: ${tx.hash}`);
+                    const ethLink = `<a href="https://basescan.org/tx/${tx.hash}" target="_blank" rel="noopener noreferrer" style="color:#3b82f6; text-decoration:underline; word-break:break-all;">${tx.hash.substring(0, 6)}...${tx.hash.substring(tx.hash.length - 4)} ↗</a>`;
+
+                    showModal("Успешно!", `Вы приобрели MCF за ETH!<br><br><strong>Хэш:</strong> ${ethLink}`);
 
                 } else {
                     const tokenAddress = (currency === "USDC") ? USDC_ADDRESS : USDT_ADDRESS;
@@ -272,10 +275,12 @@ const BASE_CHAIN_ID = "0x2105"; // Chain ID 8453 (Base)
                     }
 
                     buyBtn.innerText = "Обработка...";
-                    showModal("Транзакция отправлена", `Ожидаем подтверждения...\nHash: ${tx.hash}`);
+                    const pendingLink = `<a href="https://basescan.org/tx/${tx.hash}" target="_blank" rel="noopener noreferrer" style="color:#3b82f6; text-decoration:underline; word-break:break-all;">${tx.hash.substring(0, 6)}...${tx.hash.substring(tx.hash.length - 4)} ↗</a>`;
+                    showModal("Транзакция отправлена", `Ожидаем подтверждения...<br><br><strong>Хэш:</strong> ${pendingLink}`);
 
                     await tx.wait();
-                    showModal("Поздравляем!", `Вы приобрели MCF за ${currency}!\nХэш: ${tx.hash}`);
+                    const tokenLink = `<a href="https://basescan.org/tx/${tx.hash}" target="_blank" rel="noopener noreferrer" style="color:#3b82f6; text-decoration:underline; word-break:break-all;">${tx.hash.substring(0, 6)}...${tx.hash.substring(tx.hash.length - 4)} ↗</a>`;
+                    showModal("Поздравляем!", `Вы приобрели MCF за ${currency}!<br><br><strong>Хэш:</strong> ${tokenLink}`);
                 }
 
                 document.getElementById('payAmountInput').value = "";
@@ -308,4 +313,4 @@ const BASE_CHAIN_ID = "0x2105"; // Chain ID 8453 (Base)
             if (event.target.id === 'aboutModal') {
                 closeAboutModal();
             }
-        }
+        }    
