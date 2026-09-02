@@ -530,7 +530,7 @@
                 flex-direction: column;
             }
             .hero-buttons .btn {
-                
+                text-align: center;
                 width: fit-content;
             }
             .container {
