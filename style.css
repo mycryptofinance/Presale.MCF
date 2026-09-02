@@ -530,7 +530,8 @@
                 flex-direction: column;
             }
             .hero-buttons .btn {
-                width: 100%;
+                
+                width: fit-content;
             }
             .container {
                 padding: 0 12px;
